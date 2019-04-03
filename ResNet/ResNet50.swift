@@ -409,7 +409,6 @@ struct ResNet101: Layer {
         tmp = l3d.applied(to: tmp, in: context)
 
         tmp = l4a.applied(to: tmp, in: context)
-
         tmp = l4b.applied(to: tmp, in: context)
         tmp = l4c.applied(to: tmp, in: context)
         tmp = l4d.applied(to: tmp, in: context)
@@ -485,7 +484,6 @@ struct ResNet152: Layer {
         tmp = l3d.applied(to: tmp, in: context)
 
         tmp = l4a.applied(to: tmp, in: context)
-
         tmp = l4b.applied(to: tmp, in: context)
         tmp = l4c.applied(to: tmp, in: context)
         tmp = l4d.applied(to: tmp, in: context)
