@@ -139,7 +139,7 @@ public struct MBConvBlockStack: Layer {
         self.blocks = [MBConvBlock(filters: (filters.0, filters.1),
             strides: initialStrides, kernel: kernel)]
         for _ in 1..<blockCount {
-            self.blocks += [MBConvBlock(filters: (filters.1, filters.1), kernel: kernel)]
+            self.blocks.append(MBConvBlock(filters: (filters.1, filters.1), kernel: kernel))
         }
     }
 
@@ -165,8 +165,8 @@ public struct EfficientNet: Layer {
     public var residualBlockStack6 = MBConvBlockStack(filters: (192, 320), initialStrides: (1, 1),
         blockCount: 1)
 
-    public var avgPool = GlobalAvgPool2D<Float>()
     public var finalConv: Conv2D<Float>
+    public var avgPool = GlobalAvgPool2D<Float>()
     public var dropout = Dropout<Float>(probability: 0.2)
     public var output: Dense<Float>
 
@@ -181,7 +181,6 @@ public struct EfficientNet: Layer {
             filterShape: (1, 1, 320, 1280),
             strides: (1, 1),
             padding: .same)
-        avgPool = GlobalAvgPool2D()
         output = Dense(inputSize: 1280, outputSize: classCount)
     }
 
