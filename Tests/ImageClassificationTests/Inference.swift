@@ -31,6 +31,15 @@ final class ImageClassificationInferenceTests: XCTestCase {
         XCTAssertEqual(denseNet121Result.shape, [1, 1000])
     }
 
+    func testEfficientNet() {
+        let input = Tensor<Float>(
+            randomNormal: [1, 224, 224, 3], mean: Tensor<Float>(0.5),
+            standardDeviation: Tensor<Float>(0.1), seed: (0xffeffe, 0xfffe))
+        let efficientNet = EfficientNet(classCount: 1000)
+        let efficientNetResult = efficientNet(input)
+        XCTAssertEqual(efficientNetResult.shape, [1, 1000])
+    }
+
     func testLeNet() {
         let leNet = LeNet()
         let input = Tensor<Float>(
@@ -263,6 +272,7 @@ final class ImageClassificationInferenceTests: XCTestCase {
 extension ImageClassificationInferenceTests {
     static var allTests = [
         ("testDenseNet121", testDenseNet121),
+        ("testEfficientNet", testEfficientNet),
         ("testLeNet", testLeNet),
         ("testMobileNetV1", testMobileNetV1),
         ("testMobileNetV2", testMobileNetV2),
