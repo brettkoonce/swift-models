@@ -27,7 +27,6 @@ fileprivate func roundBlockDepthUp(blockCount: Int) -> Int {
     /// Multiply + round up the number of blocks based on global depth multiplier
     var newFilterCount = depthCoefficient * Float(blockCount)
     newFilterCount.round(.up)
-    print (blockCount, newFilterCount)
     return Int(newFilterCount)
 }
 
