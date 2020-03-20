@@ -21,22 +21,22 @@ final class SnappyDecompressionTests: XCTestCase {
     let resourceBaseLocation = URL(fileURLWithPath: #file).deletingLastPathComponent()
         .appendingPathComponent("IndexFiles")
     
-    func testReadingVarints() {
-        let oneByteVarints = Data([24, 0, 63])
+    func testReadingVariants() {
+        let oneByteVariants = Data([24, 0, 63])
         var index = 0
-        let varint1 = oneByteVarints.readVarint32(at: &index)
+        let varint1 = oneByteVariants.readVarint32(at: &index)
         XCTAssertEqual(index, 1)
         XCTAssertEqual(varint1, 24)
-        let varint2 = oneByteVarints.readVarint32(at: &index)
+        let varint2 = oneByteVariants.readVarint32(at: &index)
         XCTAssertEqual(index, 2)
         XCTAssertEqual(varint2, 0)
-        let varint3 = oneByteVarints.readVarint32(at: &index)
+        let varint3 = oneByteVariants.readVarint32(at: &index)
         XCTAssertEqual(index, 3)
         XCTAssertEqual(varint3, 63)
         
-        let multiByteVarints = Data([172, 2])
+        let multiByteVariants = Data([172, 2])
         index = 0
-        let varint4 = multiByteVarints.readVarint32(at: &index)
+        let varint4 = multiByteVariants.readVarint32(at: &index)
         XCTAssertEqual(index, 2)
         XCTAssertEqual(varint4, 300)
     }
@@ -89,9 +89,9 @@ final class SnappyDecompressionTests: XCTestCase {
 
 extension SnappyDecompressionTests {
     static var allTests = [
-        ("testReadingVarints", testReadingVarints),
+        ("testReadingVariants", testReadingVariants),
         ("testReadingData", testReadingData),
-        ("testDecodingSnappystream", testDecodingSnappyStream),
+        ("testDecodingSnappyStream", testDecodingSnappyStream),
         ("testDecompressingMiniGo", testDecompressingMiniGo),
     ]
 }
