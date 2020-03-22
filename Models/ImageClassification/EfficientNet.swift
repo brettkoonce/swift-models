@@ -82,8 +82,8 @@ public struct InitialMBConvBlock: Layer {
     @differentiable
     public func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
         let dw = swish(batchNormDConv(dConv(input)))
-        let se = sigmoid(seExpandConv(swish(seReduceConv(dw))))
-        return conv2(se)
+        let se = dw * sigmoid(seExpandConv(swish(seReduceConv(dw))))
+        return batchNormConv(conv2(se))
     }
 }
 
@@ -147,7 +147,7 @@ public struct MBConvBlock: Layer {
         } else {
             dw = swish(zeroPad(batchNormDConv(dConv(pw))))
         }
-        let se = sigmoid(seExpandConv(swish(seReduceConv(dw))))
+        let se = dw * sigmoid(seExpandConv(swish(seReduceConv(dw))))
         let pwLinear = batchNormConv2(conv2(se))
 
         if self.addResLayer {
@@ -193,10 +193,11 @@ public struct EfficientNet: Layer {
     public var residualBlockStack5: MBConvBlockStack
     public var residualBlockStack6: MBConvBlockStack
 
-    public var finalConv: Conv2D<Float>
+    public var outputConv: Conv2D<Float>
+    public var outputConvBatchNorm: BatchNorm<Float>
     public var avgPool = GlobalAvgPool2D<Float>()
     public var dropoutProb: Dropout<Float>
-    public var output: Dense<Float>
+    public var outputClassifier: Dense<Float>
 
     /// default settings are efficientnetB0 (baseline) network
     /// resolution is here to show what the network can take as input, it doesn't set anything!
@@ -231,21 +232,24 @@ public struct EfficientNet: Layer {
         residualBlockStack6 = MBConvBlockStack(filters: (192, 320), initialStrides: (1, 1),
             blockCount: 1)
 
-        finalConv = Conv2D<Float>(
+        outputConv = Conv2D<Float>(
             filterShape: (1, 1, roundFilterCountDown(filter: 320), roundFilterCountDown(filter: 1280)),
             strides: (1, 1),
             padding: .same)
+        outputConvBatchNorm = BatchNorm(featureCount: roundFilterCountDown(filter: 1280))
+
         dropoutProb = Dropout<Float>(probability: dropout)
-        output = Dense(inputSize: roundFilterCountDown(filter: 1280), outputSize: classCount)
+        outputClassifier = Dense(inputSize: roundFilterCountDown(filter: 1280), outputSize: classCount)
     }
 
     @differentiable
     public func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
-        let convolved = input.sequenced(through: inputConv, inputConvBatchNorm,
-            initialMBConv)
-        let backbone = convolved.sequenced(through: residualBlockStack1, residualBlockStack2,
+        let convolved = swish(input.sequenced(through: inputConv, inputConvBatchNorm))
+        let initialBlock = initialMBConv(convolved)
+        let backbone = initialBlock.sequenced(through: residualBlockStack1, residualBlockStack2,
             residualBlockStack3, residualBlockStack4, residualBlockStack5, residualBlockStack6)
-        return backbone.sequenced(through: finalConv, avgPool, dropoutProb, output)
+        let output = swish(backbone.sequenced(through: outputConv, outputConvBatchNorm))
+        return output.sequenced(through: avgPool, dropoutProb, outputClassifier)
     }
 }
 
