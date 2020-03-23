@@ -264,6 +264,7 @@ extension EfficientNet {
         case efficientnetB6
         case efficientnetB7
         case efficientnetB8
+        case efficientnetL2
     }
 
     public init(kind: Kind, classCount: Int = 1000) {
@@ -286,6 +287,9 @@ extension EfficientNet {
             self.init(classCount: classCount, width: 2.0, depth: 3.1, resolution: 600, dropout: 0.5)
         case .efficientnetB8:
             self.init(classCount: classCount, width: 2.2, depth: 3.6, resolution: 672, dropout: 0.5)
+        case .efficientnetL2:
+            // https://arxiv.org/abs/1911.04252
+            self.init(classCount: classCount, width: 4.3, depth: 5.3, resolution: 800, dropout: 0.5)
         }
     }
 }

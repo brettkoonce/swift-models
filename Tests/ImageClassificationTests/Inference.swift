@@ -78,6 +78,10 @@ final class ImageClassificationInferenceTests: XCTestCase {
         let efficientNetB8 = EfficientNet(kind: .efficientnetB8, classCount: 1000)
         let efficientNetB8Result = efficientNetB8(input)
         XCTAssertEqual(efficientNetB8Result.shape, [1, 1000])
+
+        let efficientNetL2 = EfficientNet(kind: .efficientnetL2, classCount: 1000)
+        let efficientNetL2Result = efficientNetL2(input)
+        XCTAssertEqual(efficientNetL2Result.shape, [1, 1000])
     }
 
     func testLeNet() {
