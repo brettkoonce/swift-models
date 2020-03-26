@@ -81,8 +81,8 @@ public struct InitialMBConvBlock: Layer {
 
     @differentiable
     public func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
-        let dw = swish(batchNormDConv(dConv(input)))
-        let se = dw * sigmoid(seExpandConv(swish(seReduceConv(dw))))
+        let depthwise = swish(batchNormDConv(dConv(input)))
+        let se = depthwise * sigmoid(seExpandConv(swish(seReduceConv(depthwise))))
         return batchNormConv(conv2(se))
     }
 }
@@ -140,20 +140,20 @@ public struct MBConvBlock: Layer {
 
     @differentiable
     public func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
-        let pw = swish(batchNormConv1(conv1(input)))
-        var dw: Tensor<Float>
+        let piecewise = swish(batchNormConv1(conv1(input)))
+        var depthwise: Tensor<Float>
         if self.strides == (1, 1) {
-            dw = swish(batchNormDConv(dConv(pw)))
+            depthwise = swish(batchNormDConv(dConv(piecewise)))
         } else {
-            dw = swish(zeroPad(batchNormDConv(dConv(pw))))
+            depthwise = swish(zeroPad(batchNormDConv(dConv(piecewise))))
         }
-        let se = dw * sigmoid(seExpandConv(swish(seReduceConv(dw))))
-        let pwLinear = batchNormConv2(conv2(se))
+        let se = depthwise * sigmoid(seExpandConv(swish(seReduceConv(depthwise))))
+        let piecewiseLinear = batchNormConv2(conv2(se))
 
         if self.addResLayer {
-            return input + pwLinear
+            return input + piecewiseLinear
         } else {
-            return pwLinear
+            return piecewiseLinear
         }
     }
 }
