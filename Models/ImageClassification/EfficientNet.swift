@@ -251,7 +251,7 @@ public struct EfficientNet: Layer {
         outputConvBatchNorm = BatchNorm(featureCount: roundFilterCountDown(filter: 1280))
 
         dropoutProb = Dropout<Float>(probability: dropout)
-        outputClassifier = Dense(inputSize: roundFilterCountDown(filter: 1280), outputSize: classCount)
+        outputClassifier = Dense(inputSize: roundFilterCountDown(filter: 1280), outputSize: classCount, activation: softmax)
     }
 
     @differentiable
