@@ -145,7 +145,7 @@ public struct MBConvBlock: Layer {
         if self.strides == (1, 1) {
             depthwise = swish(batchNormDConv(dConv(piecewise)))
         } else {
-            depthwise = swish(zeroPad(batchNormDConv(dConv(piecewise))))
+            depthwise = swish(batchNormDConv(dConv(zeroPad(piecewise)))))
         }
         let se = depthwise * sigmoid(seExpandConv(swish(seReduceConv(depthwise))))
         let piecewiseLinear = batchNormConv2(conv2(se))
@@ -182,6 +182,7 @@ public struct MBConvBlockStack: Layer {
 }
 
 public struct EfficientNet: Layer {
+    @noDerivative public let zeroPad = ZeroPadding2D<Float>(padding: ((0, 1), (0, 1)))
     public var inputConv: Conv2D<Float>
     public var inputConvBatchNorm: BatchNorm<Float>
     public var initialMBConv: InitialMBConvBlock
@@ -244,7 +245,7 @@ public struct EfficientNet: Layer {
 
     @differentiable
     public func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
-        let convolved = swish(input.sequenced(through: inputConv, inputConvBatchNorm))
+        let convolved = swish(input.sequenced(through: zeroPad, inputConv, inputConvBatchNorm))
         let initialBlock = initialMBConv(convolved)
         let backbone = initialBlock.sequenced(through: residualBlockStack1, residualBlockStack2,
             residualBlockStack3, residualBlockStack4, residualBlockStack5, residualBlockStack6)
