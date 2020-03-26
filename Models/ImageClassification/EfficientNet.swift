@@ -50,15 +50,18 @@ fileprivate func roundFilterPair(filters: (Int, Int)) -> (Int, Int) {
 }
 
 public struct InitialMBConvBlock: Layer {
+    @noDerivative public var hiddenDimension: Int
     public var dConv: DepthwiseConv2D<Float>
     public var batchNormDConv: BatchNorm<Float>
+    public var seAveragePool = GlobalAvgPool2D<Float>()
     public var seReduceConv: Conv2D<Float>
     public var seExpandConv: Conv2D<Float>
     public var conv2: Conv2D<Float>
-    public var batchNormConv: BatchNorm<Float>
+    public var batchNormConv2: BatchNorm<Float>
 
     public init(filters: (Int, Int)) {
         let filterMult = roundFilterPair(filters: filters)
+        self.hiddenDimension = filterMult.0
         dConv = DepthwiseConv2D<Float>(
             filterShape: (3, 3, filterMult.0, 1),
             strides: (1, 1),
@@ -76,14 +79,17 @@ public struct InitialMBConvBlock: Layer {
             strides: (1, 1),
             padding: .same)
         batchNormDConv = BatchNorm(featureCount: filterMult.0)
-        batchNormConv = BatchNorm(featureCount: filterMult.1)
+        batchNormConv2 = BatchNorm(featureCount: filterMult.1)
     }
 
     @differentiable
     public func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
         let depthwise = swish(batchNormDConv(dConv(input)))
-        let squeezeExcite = depthwise * sigmoid(seExpandConv(swish(seReduceConv(depthwise))))
-        return batchNormConv(conv2(squeezeExcite))
+        let seAvgPoolReshaped = seAveragePool(depthwise).reshaped(to: [
+                input.shape[0], 1, 1, self.hiddenDimension
+            ])
+        let squeezeExcite = sigmoid(seExpandConv(swish(seReduceConv(seAvgPoolReshaped))))
+        return batchNormConv2(conv2(depthwise * squeezeExcite))
     }
 }
 
@@ -91,6 +97,7 @@ public struct MBConvBlock: Layer {
     @noDerivative public var addResLayer: Bool
     @noDerivative public var strides: (Int, Int)
     @noDerivative public let zeroPad = ZeroPadding2D<Float>(padding: ((0, 1), (0, 1)))
+    @noDerivative public var hiddenDimension: Int
 
     public var conv1: Conv2D<Float>
     public var batchNormConv1: BatchNorm<Float>
@@ -112,7 +119,7 @@ public struct MBConvBlock: Layer {
         self.addResLayer = filters.0 == filters.1 && strides == (1, 1)
 
         let filterMult = roundFilterPair(filters: filters)
-        let hiddenDimension = filterMult.0 * depthMultiplier
+        self.hiddenDimension = filterMult.0 * depthMultiplier
         let reducedDimension = max(1, Int(filterMult.0 / 4))
         conv1 = Conv2D<Float>(
             filterShape: (1, 1, filterMult.0, hiddenDimension),
@@ -148,8 +155,11 @@ public struct MBConvBlock: Layer {
         } else {
             depthwise = swish(batchNormDConv(dConv(zeroPad(piecewise))))
         }
-        let squeezeExcite = depthwise * sigmoid(seExpandConv(swish(seReduceConv(seAveragePool(depthwise)))))
-        let piecewiseLinear = batchNormConv2(conv2(squeezeExcite))
+        let seAvgPoolReshaped = seAveragePool(depthwise).reshaped(to: [
+                input.shape[0], 1, 1, self.hiddenDimension
+            ])
+        let squeezeExcite = sigmoid(seExpandConv(swish(seReduceConv(seAvgPoolReshaped))))
+        let piecewiseLinear = batchNormConv2(conv2(depthwise * squeezeExcite))
 
         if self.addResLayer {
             return input + piecewiseLinear
