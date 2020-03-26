@@ -82,8 +82,8 @@ public struct InitialMBConvBlock: Layer {
     @differentiable
     public func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
         let depthwise = swish(batchNormDConv(dConv(input)))
-        let se = depthwise * sigmoid(seExpandConv(swish(seReduceConv(depthwise))))
-        return batchNormConv(conv2(se))
+        let squeezeExcite = depthwise * sigmoid(seExpandConv(swish(seReduceConv(depthwise))))
+        return batchNormConv(conv2(squeezeExcite))
     }
 }
 
@@ -96,6 +96,7 @@ public struct MBConvBlock: Layer {
     public var batchNormConv1: BatchNorm<Float>
     public var dConv: DepthwiseConv2D<Float>
     public var batchNormDConv: BatchNorm<Float>
+    public var seAveragePool = GlobalAvgPool2D<Float>()
     public var seReduceConv: Conv2D<Float>
     public var seExpandConv: Conv2D<Float>
     public var conv2: Conv2D<Float>
@@ -147,8 +148,8 @@ public struct MBConvBlock: Layer {
         } else {
             depthwise = swish(batchNormDConv(dConv(zeroPad(piecewise)))))
         }
-        let se = depthwise * sigmoid(seExpandConv(swish(seReduceConv(depthwise))))
-        let piecewiseLinear = batchNormConv2(conv2(se))
+        let squeezeExcite = depthwise * sigmoid(seExpandConv(swish(seReduceConv(seAveragePool(depthwise)))))
+        let piecewiseLinear = batchNormConv2(conv2(squeezeExcite))
 
         if self.addResLayer {
             return input + piecewiseLinear
