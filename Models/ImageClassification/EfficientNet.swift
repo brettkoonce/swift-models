@@ -146,7 +146,7 @@ public struct MBConvBlock: Layer {
         if self.strides == (1, 1) {
             depthwise = swish(batchNormDConv(dConv(piecewise)))
         } else {
-            depthwise = swish(batchNormDConv(dConv(zeroPad(piecewise)))))
+            depthwise = swish(batchNormDConv(dConv(zeroPad(piecewise))))
         }
         let squeezeExcite = depthwise * sigmoid(seExpandConv(swish(seReduceConv(seAveragePool(depthwise)))))
         let piecewiseLinear = batchNormConv2(conv2(squeezeExcite))
