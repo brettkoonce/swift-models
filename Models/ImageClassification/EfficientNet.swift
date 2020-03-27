@@ -184,7 +184,8 @@ public struct MBConvBlockStack: Layer {
         self.blocks = [MBConvBlock(filters: (filters.0, filters.1), width: width,
             strides: initialStrides, kernel: kernel)]
         for _ in 1..<blockMult {
-            self.blocks.append(MBConvBlock(filters: (filters.1, filters.1), width: width, kernel: kernel))
+            self.blocks.append(MBConvBlock(filters: (filters.1, filters.1),
+                width: width, kernel: kernel))
         }
     }
 
@@ -230,25 +231,29 @@ public struct EfficientNet: Layer {
 
         initialMBConv = InitialMBConvBlock(filters: (32, 16), width: width)
 
-        residualBlockStack1 = MBConvBlockStack(filters: (16, 24), width: width, blockCount: 2, depth: depth)
-        residualBlockStack2 = MBConvBlockStack(filters: (24, 40), width: width, kernel: (5, 5),
+        residualBlockStack1 = MBConvBlockStack(filters: (16, 24), width: width,
             blockCount: 2, depth: depth)
-        residualBlockStack3 = MBConvBlockStack(filters: (40, 80), width: width, blockCount: 3, depth: depth)
-        residualBlockStack4 = MBConvBlockStack(filters: (80, 112), width: width, initialStrides: (1, 1),
-            kernel: (5, 5), blockCount: 3, depth: depth)
-        residualBlockStack5 = MBConvBlockStack(filters: (112, 192), width: width, kernel: (5, 5),
-            blockCount: 4, depth: depth)
-        residualBlockStack6 = MBConvBlockStack(filters: (192, 320), width: width, initialStrides: (1, 1),
-            blockCount: 1, depth: depth)
+        residualBlockStack2 = MBConvBlockStack(filters: (24, 40), width: width,
+            kernel: (5, 5), blockCount: 2, depth: depth)
+        residualBlockStack3 = MBConvBlockStack(filters: (40, 80), width: width,
+            blockCount: 3, depth: depth)
+        residualBlockStack4 = MBConvBlockStack(filters: (80, 112), width: width,
+            initialStrides: (1, 1), kernel: (5, 5), blockCount: 3, depth: depth)
+        residualBlockStack5 = MBConvBlockStack(filters: (112, 192), width: width,
+            kernel: (5, 5), blockCount: 4, depth: depth)
+        residualBlockStack6 = MBConvBlockStack(filters: (192, 320), width: width,
+            initialStrides: (1, 1), blockCount: 1, depth: depth)
 
         outputConv = Conv2D<Float>(
-            filterShape: (1, 1, makeDivisible(filter: 320, width: width), makeDivisible(filter: 1280, width: width)),
+            filterShape: (1, 1,
+            makeDivisible(filter: 320, width: width), makeDivisible(filter: 1280, width: width)),
             strides: (1, 1),
             padding: .same)
         outputConvBatchNorm = BatchNorm(featureCount: makeDivisible(filter: 1280, width: width))
 
         dropoutProb = Dropout<Float>(probability: dropout)
-        outputClassifier = Dense(inputSize: makeDivisible(filter: 1280, width: width), outputSize: classCount, activation: softmax)
+        outputClassifier = Dense(inputSize: makeDivisible(filter: 1280, width: width),
+            outputSize: classCount, activation: softmax)
     }
 
     @differentiable
