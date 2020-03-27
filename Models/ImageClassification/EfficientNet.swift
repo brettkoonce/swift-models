@@ -44,8 +44,10 @@ fileprivate func makeDivisible(filter: Int, width: Float, divisor: Float = 8.0) 
 }
 
 fileprivate func roundFilterPair(filters: (Int, Int), width: Float) -> (Int, Int) {
-    return (makeDivisible(filter: filters.0, width: width),
-            makeDivisible(filter: filters.1, width: width))
+    return (
+        makeDivisible(filter: filters.0, width: width),
+        makeDivisible(filter: filters.1, width: width)
+    )
 }
 
 public struct InitialMBConvBlock: Layer {
@@ -85,8 +87,8 @@ public struct InitialMBConvBlock: Layer {
     public func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
         let depthwise = swish(batchNormDConv(dConv(input)))
         let seAvgPoolReshaped = seAveragePool(depthwise).reshaped(to: [
-                input.shape[0], 1, 1, self.hiddenDimension
-            ])
+            input.shape[0], 1, 1, self.hiddenDimension
+        ])
         let squeezeExcite = sigmoid(seExpandConv(swish(seReduceConv(seAvgPoolReshaped))))
         return batchNormConv2(conv2(depthwise * squeezeExcite))
     }
@@ -156,8 +158,8 @@ public struct MBConvBlock: Layer {
             depthwise = swish(batchNormDConv(dConv(zeroPad(piecewise))))
         }
         let seAvgPoolReshaped = seAveragePool(depthwise).reshaped(to: [
-                input.shape[0], 1, 1, self.hiddenDimension
-            ])
+            input.shape[0], 1, 1, self.hiddenDimension
+        ])
         let squeezeExcite = sigmoid(seExpandConv(swish(seReduceConv(seAvgPoolReshaped))))
         let piecewiseLinear = batchNormConv2(conv2(depthwise * squeezeExcite))
 
@@ -181,11 +183,16 @@ public struct MBConvBlockStack: Layer {
         depth: Float
     ) {
         let blockMult = resizeDepth(blockCount: blockCount, depth: depth)
-        self.blocks = [MBConvBlock(filters: (filters.0, filters.1), width: width,
-            strides: initialStrides, kernel: kernel)]
+        self.blocks = [
+            MBConvBlock(
+                filters: (filters.0, filters.1), width: width,
+                strides: initialStrides, kernel: kernel)
+        ]
         for _ in 1..<blockMult {
-            self.blocks.append(MBConvBlock(filters: (filters.1, filters.1),
-                width: width, kernel: kernel))
+            self.blocks.append(
+                MBConvBlock(
+                    filters: (filters.1, filters.1),
+                    width: width, kernel: kernel))
         }
     }
 
@@ -231,28 +238,37 @@ public struct EfficientNet: Layer {
 
         initialMBConv = InitialMBConvBlock(filters: (32, 16), width: width)
 
-        residualBlockStack1 = MBConvBlockStack(filters: (16, 24), width: width,
+        residualBlockStack1 = MBConvBlockStack(
+            filters: (16, 24), width: width,
             blockCount: 2, depth: depth)
-        residualBlockStack2 = MBConvBlockStack(filters: (24, 40), width: width,
+        residualBlockStack2 = MBConvBlockStack(
+            filters: (24, 40), width: width,
             kernel: (5, 5), blockCount: 2, depth: depth)
-        residualBlockStack3 = MBConvBlockStack(filters: (40, 80), width: width,
+        residualBlockStack3 = MBConvBlockStack(
+            filters: (40, 80), width: width,
             blockCount: 3, depth: depth)
-        residualBlockStack4 = MBConvBlockStack(filters: (80, 112), width: width,
+        residualBlockStack4 = MBConvBlockStack(
+            filters: (80, 112), width: width,
             initialStrides: (1, 1), kernel: (5, 5), blockCount: 3, depth: depth)
-        residualBlockStack5 = MBConvBlockStack(filters: (112, 192), width: width,
+        residualBlockStack5 = MBConvBlockStack(
+            filters: (112, 192), width: width,
             kernel: (5, 5), blockCount: 4, depth: depth)
-        residualBlockStack6 = MBConvBlockStack(filters: (192, 320), width: width,
+        residualBlockStack6 = MBConvBlockStack(
+            filters: (192, 320), width: width,
             initialStrides: (1, 1), blockCount: 1, depth: depth)
 
         outputConv = Conv2D<Float>(
-            filterShape: (1, 1,
-            makeDivisible(filter: 320, width: width), makeDivisible(filter: 1280, width: width)),
+            filterShape: (
+                1, 1,
+                makeDivisible(filter: 320, width: width), makeDivisible(filter: 1280, width: width)
+            ),
             strides: (1, 1),
             padding: .same)
         outputConvBatchNorm = BatchNorm(featureCount: makeDivisible(filter: 1280, width: width))
 
         dropoutProb = Dropout<Float>(probability: dropout)
-        outputClassifier = Dense(inputSize: makeDivisible(filter: 1280, width: width),
+        outputClassifier = Dense(
+            inputSize: makeDivisible(filter: 1280, width: width),
             outputSize: classCount, activation: softmax)
     }
 
@@ -260,7 +276,8 @@ public struct EfficientNet: Layer {
     public func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
         let convolved = swish(input.sequenced(through: zeroPad, inputConv, inputConvBatchNorm))
         let initialBlock = initialMBConv(convolved)
-        let backbone = initialBlock.sequenced(through: residualBlockStack1, residualBlockStack2,
+        let backbone = initialBlock.sequenced(
+            through: residualBlockStack1, residualBlockStack2,
             residualBlockStack3, residualBlockStack4, residualBlockStack5, residualBlockStack6)
         let output = swish(backbone.sequenced(through: outputConv, outputConvBatchNorm))
         return output.sequenced(through: avgPool, dropoutProb, outputClassifier)
