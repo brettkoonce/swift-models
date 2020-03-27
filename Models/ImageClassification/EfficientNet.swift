@@ -89,8 +89,9 @@ public struct InitialMBConvBlock: Layer {
         let seAvgPoolReshaped = seAveragePool(depthwise).reshaped(to: [
             input.shape[0], 1, 1, self.hiddenDimension
         ])
-        let squeezeExcite = sigmoid(seExpandConv(swish(seReduceConv(seAvgPoolReshaped))))
-        return batchNormConv2(conv2(depthwise * squeezeExcite))
+        let squeezeExcite = depthwise
+            * sigmoid(seExpandConv(swish(seReduceConv(seAvgPoolReshaped))))
+        return batchNormConv2(conv2(squeezeExcite))
     }
 }
 
@@ -160,8 +161,9 @@ public struct MBConvBlock: Layer {
         let seAvgPoolReshaped = seAveragePool(depthwise).reshaped(to: [
             input.shape[0], 1, 1, self.hiddenDimension
         ])
-        let squeezeExcite = sigmoid(seExpandConv(swish(seReduceConv(seAvgPoolReshaped))))
-        let piecewiseLinear = batchNormConv2(conv2(depthwise * squeezeExcite))
+        let squeezeExcite = depthwise
+            * sigmoid(seExpandConv(swish(seReduceConv(seAvgPoolReshaped))))
+        let piecewiseLinear = batchNormConv2(conv2(squeezeExcite))
 
         if self.addResLayer {
             return input + piecewiseLinear
