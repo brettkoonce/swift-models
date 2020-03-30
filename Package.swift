@@ -18,6 +18,7 @@ let package = Package(
         .library(name: "TextModels", targets: ["TextModels"]),
         .executable(name: "Benchmarks", targets: ["Benchmarks"]),
         .executable(name: "VGG-Imagewoof", targets: ["VGG-Imagewoof"]),
+        .executable(name: "MobileNetV2-Imagewoof", targets: ["MobileNetV2-Imagewoof"]),
         .executable(name: "Regression-BostonHousing", targets: ["Regression-BostonHousing"]),
         .executable(name: "Custom-CIFAR10", targets: ["Custom-CIFAR10"]),
         .executable(name: "ResNet-CIFAR10", targets: ["ResNet-CIFAR10"]),
@@ -35,7 +36,8 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.7.0"),
-        .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "0.0.1")),
+        .package(
+            url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "0.0.1")),
     ],
     targets: [
         .target(name: "Batcher", path: "Batcher"),
@@ -58,6 +60,9 @@ let package = Package(
         .target(
             name: "VGG-Imagewoof", dependencies: ["ImageClassificationModels", "Datasets"],
             path: "Examples/VGG-Imagewoof"),
+        .target(
+            name: "MobileNetV2-Imagewoof", dependencies: ["ImageClassificationModels", "Datasets"],
+            path: "Examples/MobileNetV2-Imagewoof"),
         .target(
             name: "Regression-BostonHousing", dependencies: ["Datasets"],
             path: "Examples/Regression-BostonHousing"),
@@ -103,7 +108,8 @@ let package = Package(
         .testTarget(name: "FastStyleTransferTests", dependencies: ["FastStyleTransfer"]),
         .target(
             name: "Benchmarks",
-            dependencies: ["Datasets", "ModelSupport", "ImageClassificationModels", "ArgumentParser"],
+            dependencies: ["Datasets", "ModelSupport", "ImageClassificationModels", "ArgumentParser"
+            ],
             path: "Benchmarks"),
         .testTarget(name: "CheckpointTests", dependencies: ["ModelSupport"]),
         .target(
