@@ -24,7 +24,7 @@ let optimizer = SGD(for: model, learningRate: 0.002)
 
 print("Starting training...")
 
-for epoch in 1...30 {
+for epoch in 1...100 {
     Context.local.learningPhase = .training
     var trainingLossSum: Float = 0
     var trainingBatchCount = 0
