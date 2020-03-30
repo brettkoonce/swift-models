@@ -108,7 +108,8 @@ let package = Package(
         .testTarget(name: "FastStyleTransferTests", dependencies: ["FastStyleTransfer"]),
         .target(
             name: "Benchmarks",
-            dependencies: ["Datasets", "ModelSupport", "ImageClassificationModels", "ArgumentParser"
+            dependencies: [
+                "Datasets", "ModelSupport", "ImageClassificationModels", "ArgumentParser"
             ],
             path: "Benchmarks"),
         .testTarget(name: "CheckpointTests", dependencies: ["ModelSupport"]),
