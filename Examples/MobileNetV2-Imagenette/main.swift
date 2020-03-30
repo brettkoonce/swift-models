@@ -16,19 +16,23 @@ import Datasets
 import ImageClassificationModels
 import TensorFlow
 
-let batchSize = 32
+let imagenette = Imagenette(
+    batchSize: 64,
+    inputSize: .resized320, 
+    outputSize: 224
+)
 
-let dataset = Imagewoof(batchSize: batchSize, inputSize: .full, outputSize: 224)
 var model = MobileNetV2(classCount: 10)
-let optimizer = SGD(for: model, learningRate: 0.002)
+
+let optimizer = SGD(for: model, learningRate: 0.002, momentum: 0.9)
 
 print("Starting training...")
 
-for epoch in 1...100 {
+for epoch in 1...30 {
     Context.local.learningPhase = .training
     var trainingLossSum: Float = 0
     var trainingBatchCount = 0
-    for batch in dataset.training.sequenced() {
+    for batch in imagenette.training.sequenced() {
         let (images, labels) = (batch.first, batch.second)
         let (loss, gradients) = valueWithGradient(at: model) { model -> Tensor<Float> in
             let logits = model(images)
@@ -44,7 +48,7 @@ for epoch in 1...100 {
     var testBatchCount = 0
     var correctGuessCount = 0
     var totalGuessCount = 0
-    for batch in dataset.test.sequenced() {
+    for batch in imagenette.test.sequenced() {
         let (images, labels) = (batch.first, batch.second)
         let logits = model(images)
         testLossSum += softmaxCrossEntropy(logits: logits, labels: labels).scalarized()

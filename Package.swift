@@ -18,7 +18,7 @@ let package = Package(
         .library(name: "TextModels", targets: ["TextModels"]),
         .executable(name: "Benchmarks", targets: ["Benchmarks"]),
         .executable(name: "VGG-Imagewoof", targets: ["VGG-Imagewoof"]),
-        .executable(name: "MobileNetV2-Imagewoof", targets: ["MobileNetV2-Imagewoof"]),
+        .executable(name: "MobileNetV2-Imagenette", targets: ["MobileNetV2-Imagenette"]),
         .executable(name: "Regression-BostonHousing", targets: ["Regression-BostonHousing"]),
         .executable(name: "Custom-CIFAR10", targets: ["Custom-CIFAR10"]),
         .executable(name: "ResNet-CIFAR10", targets: ["ResNet-CIFAR10"]),
@@ -61,8 +61,8 @@ let package = Package(
             name: "VGG-Imagewoof", dependencies: ["ImageClassificationModels", "Datasets"],
             path: "Examples/VGG-Imagewoof"),
         .target(
-            name: "MobileNetV2-Imagewoof", dependencies: ["ImageClassificationModels", "Datasets"],
-            path: "Examples/MobileNetV2-Imagewoof"),
+            name: "MobileNetV2-Imagenette", dependencies: ["ImageClassificationModels", "Datasets"],
+            path: "Examples/MobileNetV2-Imagenette"),
         .target(
             name: "Regression-BostonHousing", dependencies: ["Datasets"],
             path: "Examples/Regression-BostonHousing"),
