@@ -204,24 +204,24 @@ public struct MBConvBlockStack: Layer {
     }
 }
 
-public struct EfficientNet: Layer {
+struct EfficientNet: Layer {
     @noDerivative public let zeroPad = ZeroPadding2D<Float>(padding: ((0, 1), (0, 1)))
-    public var inputConv: Conv2D<Float>
-    public var inputConvBatchNorm: BatchNorm<Float>
-    public var initialMBConv: InitialMBConvBlock
+    var inputConv: Conv2D<Float>
+    var inputConvBatchNorm: BatchNorm<Float>
+    var initialMBConv: InitialMBConvBlock
 
-    public var residualBlockStack1: MBConvBlockStack
-    public var residualBlockStack2: MBConvBlockStack
-    public var residualBlockStack3: MBConvBlockStack
-    public var residualBlockStack4: MBConvBlockStack
-    public var residualBlockStack5: MBConvBlockStack
-    public var residualBlockStack6: MBConvBlockStack
+    var residualBlockStack1: MBConvBlockStack
+    var residualBlockStack2: MBConvBlockStack
+    var residualBlockStack3: MBConvBlockStack
+    var residualBlockStack4: MBConvBlockStack
+    var residualBlockStack5: MBConvBlockStack
+    var residualBlockStack6: MBConvBlockStack
 
-    public var outputConv: Conv2D<Float>
-    public var outputConvBatchNorm: BatchNorm<Float>
-    public var avgPool = GlobalAvgPool2D<Float>()
-    public var dropoutProb: Dropout<Float>
-    public var outputClassifier: Dense<Float>
+    var outputConv: Conv2D<Float>
+    var outputConvBatchNorm: BatchNorm<Float>
+    var avgPool = GlobalAvgPool2D<Float>()
+    var dropoutProb: Dropout<Float>
+    var outputClassifier: Dense<Float>
 
     /// default settings are efficientnetB0 (baseline) network
     /// resolution is here to show what the network can take as input, it doesn't set anything!
