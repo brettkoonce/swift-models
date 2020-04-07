@@ -205,7 +205,7 @@ public struct MBConvBlockStack: Layer {
 }
 
 public struct EfficientNet: Layer {
-    @noDerivative public let zeroPad = ZeroPadding2D<Float>(padding: ((0, 1), (0, 1)))
+    @noDerivative let zeroPad = ZeroPadding2D<Float>(padding: ((0, 1), (0, 1)))
     var inputConv: Conv2D<Float>
     var inputConvBatchNorm: BatchNorm<Float>
     var initialMBConv: InitialMBConvBlock
