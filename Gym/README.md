@@ -14,6 +14,11 @@ This directory contains reinforcement learning algorithms in [OpenAI Gym](https:
 
 > This demonstrates four different approaches to playing the game Blackjack, including a q-learning approach.
 
+## DQN
+
+> This demonstrates a Deep Q-Network (DQN) approach to solving the CartPole problem, based off of the paper [Human Level Control Through Deep Reinforcement Learning](https://deepmind.com/research/publications/human-level-control-through-deep-reinforcement-learning).
+
+
 ## Setup
 
 To begin, you'll need the [latest version of Swift for

@@ -179,7 +179,7 @@ while episodeIndex < maxEpisode {
     if evalEpisodeReturn > bestReturn {
       print(
         String(
-          format: "Episode: %4d | Step %6d | Epsilon: %.03f | Train: %3d | Eval: %3d", episodeIndex,
+          format: "Episode: %4d | Step: %5d | Epsilon: %.03f | Train: %3d | Eval: %3d", episodeIndex,
           stepIndex, epsilon, Int(episodeReturn), Int(evalEpisodeReturn)))
       bestReturn = evalEpisodeReturn
     }
